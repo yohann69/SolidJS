@@ -10,6 +10,9 @@ import { get } from "ol/proj";
 import "./app.scss";
 import 'ol/ol.css';
 
+import axios from "axios";
+
+
 proj4.defs("EPSG:2154", "+proj=lcc +lat_0=46.5 +lon_0=3 +lat_1=49 +lat_2=44 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs");
 register(proj4)
 const projectionL93 = get('EPSG:2154')
@@ -28,7 +31,15 @@ function App() {
 	const [getSearch, setSearch] = createSignal("");
 
 	const searchAddress = async () => {
-		console.log('Start seaching')
+		try {
+			let res = await axios.get(`https://api-adresse.data.gouv.fr/search/?q=${getSearch().replace(/ /gi, '+')}`)
+
+			if (res.status === 200){
+				console.log(res.data)
+			}else throw new Error("Erreur lors de la recherche de l'adresse");
+		} catch (e) {
+			console.error(e);
+		}
 	}
 
 	onMount(() => {
