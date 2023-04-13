@@ -1,18 +1,34 @@
-# OpenLayers + Vite
+## Usage
 
-This example demonstrates how the `ol` package can be used with [Vite](https://vitejs.dev/).
+Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
 
-To get started, run the following (requires Node 14+):
+This is the reason you see a `pnpm-lock.yaml`. That being said, any package manager will work. This file can be safely be removed once you clone a template.
 
-    npx create-ol-app my-app --template vite
+```bash
+$ npm install # or pnpm install or yarn install
+```
 
-Then change into your new `my-app` directory and start a development server (available at http://localhost:5173):
+### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
 
-    cd my-app
-    npm start
+## Available Scripts
 
-To generate a build ready for production:
+In the project directory, you can run:
 
-    npm run build
+### `npm dev` or `npm start`
 
-Then deploy the contents of the `dist` directory to your server.  You can also run `npm run serve` to serve the results of the `dist` directory for preview.
+Runs the app in the development mode.<br>
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+
+The page will reload if you make edits.<br>
+
+### `npm run build`
+
+Builds the app for production to the `dist` folder.<br>
+It correctly bundles Solid in production mode and optimizes the build for the best performance.
+
+The build is minified and the filenames include the hashes.<br>
+Your app is ready to be deployed!
+
+## Deployment
+
+You can deploy the `dist` folder to any static host provider (netlify, surge, now, etc.)
