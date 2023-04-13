@@ -11,6 +11,13 @@ import "./app.scss";
 import 'ol/ol.css';
 
 import axios from "axios";
+import VectorLayer from "ol/layer/Vector";
+import VectorSource from "ol/source/Vector";
+import GeoJSON from "ol/format/GeoJSON";
+import Style from "ol/style/Style";
+import RegularShape from "ol/style/RegularShape";
+import Fill from "ol/style/Fill";
+import Stroke from "ol/style/Stroke";
 
 
 proj4.defs("EPSG:2154", "+proj=lcc +lat_0=46.5 +lon_0=3 +lat_1=49 +lat_2=44 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs");
@@ -28,15 +35,50 @@ function App() {
 		source: new OSM()
 	});
 
+
+	var searchLayer;
+
+
 	const [getSearch, setSearch] = createSignal("");
 
 	const searchAddress = async () => {
 		try {
 			let res = await axios.get(`https://api-adresse.data.gouv.fr/search/?q=${getSearch().replace(/ /gi, '+')}`)
 
-			if (res.status === 200){
-				console.log(res.data)
-			}else throw new Error("Erreur lors de la recherche de l'adresse");
+			if (searchLayer) map.removeLayer(searchLayer)
+
+			if (res.status === 200) {
+
+				// console.log(res.data.features[0].geometry.coordinates)
+
+				searchLayer = new VectorLayer({
+					source: new VectorSource({
+						features: (new GeoJSON()).readFeatures({ ...res.data, features: res.data.features.filter(f => f.properties.citycode.match(/^(07|26)[0-9]{3}$/gi)) }, { dataProjection: 'EPSG:4326', featureProjection: projectionL93 })
+					}),
+					style: new Style({
+						image: new RegularShape({
+							points: 4,
+							radius: 8,
+							fill: new Fill({
+								color: 'rgba(255, 0, 0, 1)',
+							}),
+							stroke: new Stroke({
+								color: 'rgba(189, 155, 0, 1)',
+							}),
+						}),
+					}),
+				})
+
+				// Add the marker to the map
+				map.addLayer(searchLayer)
+
+				// Move the map view to the marker position and zoom in it
+				map.getView().animate({ duration: 500 }, { center: searchLayer.getSource().getExtent() }, { zoom: 19 })
+
+
+
+			} else throw new Error("Erreur lors de la recherche de l'adresse");
+
 		} catch (e) {
 			console.error(e);
 		}
