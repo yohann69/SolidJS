@@ -1,9 +1,18 @@
 import { Map, View } from "ol";
 import TileLayer from "ol/layer/Tile";
-import { onMount } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import OSM from "ol/source/OSM";
 
+import proj4 from "proj4";
+import { register } from "ol/proj/proj4";
+import { get } from "ol/proj";
+
 import "./app.scss";
+import 'ol/ol.css';
+
+proj4.defs("EPSG:2154", "+proj=lcc +lat_0=46.5 +lon_0=3 +lat_1=49 +lat_2=44 +x_0=700000 +y_0=6600000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs");
+register(proj4)
+const projectionL93 = get('EPSG:2154')
 
 function App() {
 
@@ -11,15 +20,23 @@ function App() {
 
 	var mapZone;
 
+
 	var background = new TileLayer({
 		source: new OSM()
 	});
 
+	const [getSearch, setSearch] = createSignal("");
+
+	const searchAddress = async () => {
+		console.log('Start seaching')
+	}
+
 	onMount(() => {
 		map = new Map({
 			view: new View({
-				center: [0, 0],
-				zoom: 1
+				center: [851869.4, 6407969.2],
+				zoom: 10,
+				projection: projectionL93,
 			}),
 			layers: [background],
 			target: mapZone,
@@ -29,7 +46,16 @@ function App() {
 
 	return (
 		<div class="container">
-			<div ref={mapZone} class="map-zone"/>
+
+			<input type="search"
+				value={getSearch()}
+				onInput={(e) => setSearch(e.target.value)}
+				placeholder="Entez votre adresse" />
+
+			<button disabled={getSearch() == ''}
+				onclick={() => searchAddress()} > 🔍 </button>
+
+			<div ref={mapZone} class="map-zone" />
 		</div>
 	);
 
