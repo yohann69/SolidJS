@@ -73,7 +73,8 @@ function App() {
 				map.addLayer(searchLayer)
 
 				// Move the map view to the marker position and zoom in it
-				map.getView().animate({ duration: 500 }, { center: searchLayer.getSource().getExtent() }, { zoom: 19 })
+				map.getView().animate({ duration: 500 }, { center: searchLayer.getSource().getExtent() })
+				map.getView().animate({ duration: 500 }, { zoom: 19 })
 
 
 
@@ -100,13 +101,15 @@ function App() {
 	return (
 		<div class="container">
 
-			<input type="search"
-				value={getSearch()}
-				onInput={(e) => setSearch(e.target.value)}
-				placeholder="Entez votre adresse" />
+			<div>
+				<input type="search"
+					value={getSearch()}
+					onInput={(e) => setSearch(e.target.value)}
+					placeholder="Entez votre adresse" />
 
-			<button disabled={getSearch() == ''}
-				onclick={() => searchAddress()} > 🔍 </button>
+				<button disabled={getSearch() == ''}
+					onclick={() => searchAddress()} > 🔍 </button>
+			</div>
 
 			<div ref={mapZone} class="map-zone" />
 		</div>
