@@ -6,12 +6,21 @@ import (
 	"time"
 )
 
-func block(s int, wg *sync.WaitGroup, allDone *sync.WaitGroup) {
+type MaStruct struct {
+	Mutex sync.Mutex
+	val   string
+}
+
+func block(s int, wg *sync.WaitGroup, allDone *sync.WaitGroup, str *MaStruct) {
 	// defer wg.Done() // Est appelé à la fin de la fonction
 
 	// 1ere partie
 	start := time.Now()
 	time.Sleep(time.Second * time.Duration(s))
+
+	str.Mutex.Lock()
+	str.val = "test"
+	str.Mutex.Unlock()
 
 	wg.Done()
 
@@ -36,9 +45,11 @@ func main() {
 
 	wg.Add(3)
 
-	go block(5, &wg, &allDone)
-	go block(1, &wg, &allDone)
-	go block(3, &wg, &allDone)
+	maStruct := MaStruct{}
+
+	go block(5, &wg, &allDone, &maStruct)
+	go block(1, &wg, &allDone, &maStruct)
+	go block(3, &wg, &allDone, &maStruct)
 
 	wg.Wait()
 	wg.Add(3)
