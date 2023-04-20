@@ -11,32 +11,41 @@ type MaStruct struct {
 	val   string
 }
 
-func block(s int, wg *sync.WaitGroup, allDone *sync.WaitGroup, str *MaStruct) {
+func block(s int, result chan bool, allDone *sync.WaitGroup, str *MaStruct) {
 	// defer wg.Done() // Est appelé à la fin de la fonction
 
 	// 1ere partie
-	start := time.Now()
 	time.Sleep(time.Second * time.Duration(s))
+
+	if s == 3 {
+		//simule un bug
+		result <- false
+		return
+	}
 
 	str.Mutex.Lock()
 	str.val = "test"
 	str.Mutex.Unlock()
 
-	wg.Done()
+	result <- true
 
 	allDone.Wait()
-
 	// 2ème partie
 	time.Sleep(time.Second * time.Duration(s))
-	wg.Done()
 
-	fmt.Printf("Durée d'éxecution: %s\n", time.Since(start))
-
+	if s == 1 {
+		//simule un bug
+		result <- false
+		return
+	}
+	result <- true
 }
 
 func main() {
 
 	start := time.Now()
+
+	result := make(chan bool)
 
 	var wg sync.WaitGroup
 	var allDone sync.WaitGroup
@@ -47,14 +56,35 @@ func main() {
 
 	maStruct := MaStruct{}
 
-	go block(5, &wg, &allDone, &maStruct)
-	go block(1, &wg, &allDone, &maStruct)
-	go block(3, &wg, &allDone, &maStruct)
+	go block(5, result, &allDone, &maStruct)
+	go block(1, result, &allDone, &maStruct)
+	go block(3, result, &allDone, &maStruct)
 
-	wg.Wait()
-	wg.Add(3)
+	goroutunes := 3
+	success := 0
+
+	for goroutunes != 0 {
+		r := <-result
+		if r {
+			success++
+		}
+		goroutunes--
+	}
+
+	fmt.Println("Success: ", success)
 	allDone.Done()
-	wg.Wait()
+
+	totalSuccess := 0
+
+	for success != 0 {
+		r := <-result
+		if r {
+			totalSuccess++
+		}
+		success--
+	}
+
+	fmt.Println("Total Success: ", totalSuccess)
 
 	fmt.Printf("Durée d'éxecution: %s\n", time.Since(start))
 
